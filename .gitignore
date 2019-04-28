@@ -35,3 +35,6 @@
 # binary format
 *.bin
 *.hex
+
+# vscode files
+.vscode/
