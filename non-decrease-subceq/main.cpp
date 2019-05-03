@@ -173,12 +173,49 @@ static InputSeqType_t GetInputSequence(std::vector<long double>& v) {
 }
 
 // -----------------------------------------------------------------------------
-int main() {
-  std::vector<long double> v;
+typedef enum {
+  TRUE_SUBSEQ_FOUND,
+  TRUE_NOT_SUBSEQ_FOUND
+} IsNonDecSubSeqType_t;
 
-  if (GetInputSequence(v) == INPUT_SEQ_TRUE) {
-    for (auto it = v.begin(); it < v.end(); ++it) {
-      std::cout << *it << std::endl;
+// -----------------------------------------------------------------------------
+typedef struct {
+  size_t sub_seq_len;
+  int serial_index;
+} SubSeqId_t;
+
+// -----------------------------------------------------------------------------
+typedef struct {
+  std::vector<long double> max_non_dec_subseq;
+  SubSeqId_t id;
+} SubSeqType_t;
+
+// -----------------------------------------------------------------------------
+static void PrintSubSeqId(SubSeqType_t& sub) {
+  std::cout << sub.id.sub_seq_len << ' ' << sub.id.serial_index << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+static void PrintSubSeqTrueNotFound() {
+  std::cout << '0' << std::endl;
+}
+
+// -----------------------------------------------------------------------------
+static IsNonDecSubSeqType_t GetNonDecreaseSubseq(std::vector<long double>& inseq,
+                                                SubSeqType_t& sub) {
+  return TRUE_SUBSEQ_FOUND;
+}
+
+// -----------------------------------------------------------------------------
+int main() {
+  std::vector<long double> sequence;
+  SubSeqType_t subseq;
+
+  if (GetInputSequence(sequence) == INPUT_SEQ_TRUE) {
+    if (GetNonDecreaseSubseq(sequence, subseq) == TRUE_SUBSEQ_FOUND) {
+      PrintSubSeqId(subseq);
+    } else {
+      PrintSubSeqTrueNotFound();
     }
   } else {
     PrintErrSequenceMsg();
