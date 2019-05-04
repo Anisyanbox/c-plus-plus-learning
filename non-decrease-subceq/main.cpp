@@ -174,25 +174,21 @@ static InputSeqType_t GetInputSequence(std::vector<long double>& v) {
 
 // -----------------------------------------------------------------------------
 typedef enum {
-  TRUE_SUBSEQ_FOUND,
-  TRUE_NOT_SUBSEQ_FOUND
-} IsNonDecSubSeqType_t;
+  NONDECREASE_SUBSEQ_FOUND,
+  NONDECREASE_NOT_SUBSEQ_FOUND
+} IsTrueSubSeqFound_t;
 
 // -----------------------------------------------------------------------------
-typedef struct {
-  size_t sub_seq_len;
-  int serial_index;
-} SubSeqId_t;
+struct SubSeq {
+  SubSeq(size_t l, int i) : len(l), idx(i) {};
+    
+  size_t len;
+  int idx;
+};
 
 // -----------------------------------------------------------------------------
-typedef struct {
-  std::vector<long double> max_non_dec_subseq;
-  SubSeqId_t id;
-} SubSeqType_t;
-
-// -----------------------------------------------------------------------------
-static void PrintSubSeqId(SubSeqType_t& sub) {
-  std::cout << sub.id.sub_seq_len << ' ' << sub.id.serial_index << std::endl;
+static void PrintSubSeqId(struct SubSeq& sub) {
+  std::cout << sub.len << ' ' << sub.idx << std::endl;
 }
 
 // -----------------------------------------------------------------------------
@@ -201,18 +197,59 @@ static void PrintSubSeqTrueNotFound() {
 }
 
 // -----------------------------------------------------------------------------
-static IsNonDecSubSeqType_t GetNonDecreaseSubseq(std::vector<long double>& inseq,
-                                                SubSeqType_t& sub) {
-  return TRUE_SUBSEQ_FOUND;
+static IsTrueSubSeqFound_t GetNonDecreaseSubseq(std::vector<long double>& inseq,
+                                                struct SubSeq& sub) {
+  long double cur_element = 0.0;
+  long double last_element = inseq[0];
+  struct SubSeq cur_tmp_sub(1, -1);
+  struct SubSeq max_tmp_sub(1, -1);
+  bool is_index_founded = false;
+  bool is_first_subseq_was_founded = false;
+
+  for (auto it = inseq.begin() + 1; it < inseq.end(); ++it) {
+    cur_element = *it;
+    if (cur_element >= last_element) {
+      if (!is_index_founded) {
+        cur_tmp_sub.idx = static_cast<int>(std::distance(inseq.begin(), it));
+        is_index_founded = true;
+      }
+      ++cur_tmp_sub.len;
+    } else {
+      if (cur_tmp_sub.len > max_tmp_sub.len) {
+        max_tmp_sub.idx = cur_tmp_sub.idx;
+        max_tmp_sub.len = cur_tmp_sub.len;
+      }
+      if (it != inseq.end() - 1) {
+        cur_tmp_sub.idx = -1;
+        cur_tmp_sub.len = 1;
+        is_index_founded = false;
+      }
+    }
+    last_element = cur_element;
+  }
+  if (cur_tmp_sub.len > max_tmp_sub.len) {
+    max_tmp_sub.idx = cur_tmp_sub.idx;
+    max_tmp_sub.len = cur_tmp_sub.len;
+  }
+  if (cur_tmp_sub.idx != -1) {
+    is_first_subseq_was_founded = true;
+
+    sub.idx = max_tmp_sub.idx;
+    sub.len = max_tmp_sub.len;
+  }
+  if (!is_first_subseq_was_founded) {
+    return NONDECREASE_NOT_SUBSEQ_FOUND;
+  }
+  return NONDECREASE_SUBSEQ_FOUND;
 }
 
 // -----------------------------------------------------------------------------
 int main() {
   std::vector<long double> sequence;
-  SubSeqType_t subseq;
+  struct SubSeq subseq(0, -1);
 
   if (GetInputSequence(sequence) == INPUT_SEQ_TRUE) {
-    if (GetNonDecreaseSubseq(sequence, subseq) == TRUE_SUBSEQ_FOUND) {
+    if (GetNonDecreaseSubseq(sequence, subseq) == NONDECREASE_SUBSEQ_FOUND) {
       PrintSubSeqId(subseq);
     } else {
       PrintSubSeqTrueNotFound();
